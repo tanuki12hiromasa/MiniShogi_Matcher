@@ -172,7 +172,7 @@ namespace USI_MultipleMatch
 					if (r % 2 != 0) {
 						//a先手
 						startpos = Kifu.GetRandomStartPos(randomposfilepath, randomposlines);
-						var result = Match.match($"{matchname}-{r}", m.byoyomi, playera, playerb, startpos);
+						var result = Match.match($"{matchname}-{r}", m.byoyomi, playera, playerb, startpos, $"./playerlog/{matchname}/kifu.txt");
 						switch (result) {
 							case Result.SenteWin: results[0]++; Console.WriteLine($" {playera.name} win"); break;
 							case Result.GoteWin: results[1]++; Console.WriteLine($" {playerb.name} win"); break;
@@ -182,7 +182,7 @@ namespace USI_MultipleMatch
 					}
 					else {
 						//b先手
-						var result = Match.match($"{matchname}-{r}", m.byoyomi, playerb, playera, startpos);
+						var result = Match.match($"{matchname}-{r}", m.byoyomi, playerb, playera, startpos, $"./playerlog/{matchname}/kifu.txt");
 						switch (result) {
 							case Result.SenteWin: results[1]++; Console.WriteLine($" {playerb.name} win"); break;
 							case Result.GoteWin: results[0]++; Console.WriteLine($" {playera.name} win"); break;
@@ -192,7 +192,7 @@ namespace USI_MultipleMatch
 					}
 				}
 				string matchResult = $"{starttime} {matchname} {m.byoyomi}ms: {results[0]}-{results[1]}-{results[2]}-{results[3]} ({playera.enginename} vs {playerb.enginename})";
-				using (var resultwriter = new StreamWriter(@$"./playerlog/{matchname}/result.txt", true)) {
+				using (var resultwriter = new StreamWriter(@$"./result.txt", true)) {
 					resultwriter.WriteLine(matchResult);
 				}
 				Console.WriteLine(matchResult);

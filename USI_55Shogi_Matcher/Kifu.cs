@@ -26,7 +26,7 @@ namespace USI_MultipleMatch
 			}
 			using (var kifuwriter = new StreamWriter($"{System.IO.Path.GetDirectoryName(kifupath)}/{System.IO.Path.GetFileNameWithoutExtension(kifupath)}.sfen", true)) {
 				kifuwriter.Write("startpos moves ");
-				foreach (var move in kifu) if (move != "resign") kifuwriter.Write(move + " ");
+				foreach (var move in kifu) kifuwriter.Write(move + " ");
 				kifuwriter.WriteLine();
 			}
 		}
