@@ -14,7 +14,7 @@ namespace USI_MultipleMatch
 			alive = true;
 			Console.WriteLine("連続対局プログラム");
 			while (alive) {
-				Console.Write("command?(r/s/tm/ts/ls/c/md/k/ks/q) > ");
+				Console.Write("command?(r/s/tm/ts/ls/c/k/ks/q) > ");
 				switch (Console.ReadLine()) {
 					case "register":
 					case "r":
@@ -39,10 +39,6 @@ namespace USI_MultipleMatch
 					case "consecutivegame":
 					case "c":
 						consecutive();
-						break;
-					case "makedata":
-					case "md":
-						MakeData.makedata();
 						break;
 					case "kifutocsa":
 					case "k":
@@ -196,7 +192,7 @@ namespace USI_MultipleMatch
 					}
 				}
 				string matchResult = $"{starttime} {matchname} {m.byoyomi}ms: {results[0]}-{results[1]}-{results[2]}-{results[3]} ({playera.enginename} vs {playerb.enginename})";
-				using (var resultwriter = new StreamWriter(@"./result.txt", true)) {
+				using (var resultwriter = new StreamWriter(@$"./playerlog/{matchname}/result.txt", true)) {
 					resultwriter.WriteLine(matchResult);
 				}
 				Console.WriteLine(matchResult);
