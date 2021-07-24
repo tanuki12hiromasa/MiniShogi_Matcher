@@ -14,7 +14,7 @@ namespace USI_MultipleMatch
 			alive = true;
 			Console.WriteLine("連続対局プログラム");
 			while (alive) {
-				Console.Write("command?(r/s/tm/ts/ls/c/k/ks/q) > ");
+				Console.Write("command?(r/s/tm/ts/ls/c/lr/ll/k/ks/q) > ");
 				switch (Console.ReadLine()) {
 					case "register":
 					case "r":
@@ -571,6 +571,30 @@ namespace USI_MultipleMatch
 				Console.WriteLine(matchResult);
 			}
 			alive = false;
+		}
+
+		static void learn_register() {
+			//
+			Console.Write("match name? >");
+			string match_name = Console.ReadLine(); 
+			Console.Write("team name? >");
+			string team_name = Console.ReadLine();
+			Console.Write("engine path? >");
+			string engine_path = Console.ReadLine();
+			Console.Write("learner path? >");
+			string learner_path = Console.ReadLine();
+			//新規の対戦部屋ならフォルダを作成
+
+			//チームフォルダを作成
+
+			//playerのオプションファイル生成
+
+			//learnerのオプションファイル生成
+
+		}
+
+		static void learn_league() {
+
 		}
 	}
 }
