@@ -14,7 +14,7 @@ namespace USI_MultipleMatch
 			alive = true;
 			Console.WriteLine("連続対局プログラム");
 			while (alive) {
-				Console.Write("command?(r/s/tm/ts/ls/c/lr/ll/k/ks/q) > ");
+				Console.Write("command?(r/s/tm/ts/ls/c/lr/ll/k/ks/rlr/rls/q) > ");
 				switch (Console.ReadLine()) {
 					case "register":
 					case "r":
@@ -47,6 +47,14 @@ namespace USI_MultipleMatch
 					case "kifutosfen":
 					case "ks":
 						Kifu.KifutxtToSfen();
+						break;
+					case "reinforcementlearningregister":
+					case "rlr":
+						learn_register();
+						break;
+					case "reinforcementlearningstart":
+					case "rls":
+						learn_league();
 						break;
 					case "quit":
 					case "q":
@@ -574,27 +582,43 @@ namespace USI_MultipleMatch
 		}
 
 		static void learn_register() {
-			//
-			Console.Write("match name? >");
-			string match_name = Console.ReadLine(); 
 			Console.Write("team name? >");
 			string team_name = Console.ReadLine();
-			Console.Write("engine path? >");
-			string engine_path = Console.ReadLine();
-			Console.Write("learner path? >");
-			string learner_path = Console.ReadLine();
-			//新規の対戦部屋ならフォルダを作成
-
-			//チームフォルダを作成
-
-			//playerのオプションファイル生成
-
-			//learnerのオプションファイル生成
-
+			LearnTeam team = new LearnTeam(team_name);
+			team.setting();
 		}
 
 		static void learn_league() {
+			Console.Write("team name? >");
+			string team_name = Console.ReadLine();
+			LearnTeam team = new LearnTeam(team_name);
+			if(!team.load()) {
+				Console.WriteLine("no such teamfile.");
+				return;
+			}
 
+			Console.WriteLine($"current ruiseki_count is {team.ruiseki_count}.");
+			int targetnum;
+			do {
+				Console.Write($"How match is target count? >");
+			} while (int.TryParse(Console.ReadLine(), out targetnum) && targetnum > team.ruiseki_count);
+
+			for (int t = team.ruiseki_count + 1; t <= targetnum; t++) {
+				//一定回数ごとにバックアップ
+				if (t % team.backup_span == 0) team.backup_param();
+
+				//手番は基本的には先後交互に, ただしチーム数が偶数だと偏るので奇数周期では反対にする
+				bool teban = ((t % 2) == 0);
+				if ((team.team_num % 2) == 0 && ((t/team.team_num) % 2) != 0) {
+					teban = !teban;
+				}
+
+				Console.WriteLine($"versus {t} start");
+				team.versus(teban, t);
+				Console.WriteLine($"versus {t} end");
+			}
+			team.backup_param();
+			Console.WriteLine($"learn end.");
 		}
 	}
 }

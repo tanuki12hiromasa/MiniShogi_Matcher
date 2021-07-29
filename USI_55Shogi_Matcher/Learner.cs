@@ -9,8 +9,10 @@ namespace USI_MultipleMatch
 	class Learner
 	{
 		public string name;
+		public string enginename;
 		public List<string> options;
 		public string learner_path;
+		const double eval_learn_border = 200;
 		public Learner(string settingpath) {
 			//1行目:name 2行目:path 3行目~:option
 			using (StreamReader reader = new StreamReader(settingpath)) {
@@ -42,6 +44,11 @@ namespace USI_MultipleMatch
 					string usi = engine.StandardOutput.ReadLine();
 					var tokens = usi.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 					switch (tokens[0]) {
+						case "id":
+							if (tokens[1] == "name") {
+								enginename = tokens[2];
+							}
+							break;
 						case "option":
 							options.Add($"{tokens[2]} {tokens[4]} {tokens[6]}");
 							break;
@@ -79,6 +86,49 @@ namespace USI_MultipleMatch
 
 
 		}
+
+
+
+		public void Learn(Result result, bool player_teban, string startsfen, List<string> kifu, List<int> evals) {
+			using Process engine = new Process();
+			Start(engine);
+			engine.StandardInput.WriteLine("learnbykifu");
+
+			//棋譜入力
+			engine.StandardInput.Write("position ");
+			engine.StandardInput.Write(startsfen);
+			foreach(var move in kifu) {
+				engine.StandardInput.Write(" ");
+				engine.StandardInput.Write(move);
+			}
+			engine.StandardInput.WriteLine();
+
+			//手番(s/g)
+			if (player_teban) {
+				engine.StandardInput.WriteLine("s");
+			}
+			else {
+				engine.StandardInput.WriteLine("g");
+			}
+
+			//勝敗(s/g/d)
+			switch (result) {
+				case Result.SenteWin: engine.StandardInput.WriteLine("s"); break;
+				case Result.Repetition:
+				case Result.GoteWin: engine.StandardInput.WriteLine("g"); break;
+				case Result.Draw: engine.StandardInput.WriteLine("d"); break;
+			}
+
+			//学習開始手数 （初手は1とする）
+			for(int n = 0; n < evals.Count; n++) {
+				if(Math.Abs(evals[n]) >= eval_learn_border) {
+					engine.StandardInput.WriteLine((n + 1).ToString());
+					break;
+				}
+			}
+
+		}
+
 		static string setoptionusi(string settingline) {
 			var token = settingline.Split(' ');
 			return $"setoption name {token[0]} value {token[2]}";

@@ -142,6 +142,127 @@ namespace USI_MultipleMatch
 			}
 		}
 
+		public static Result match(string matchname, uint byoyomi, Player b, Player w, out List<string> _kifu, out List<int> _evals, string startusi = "startpos", string kifupath = @"./kifu.txt") {
+
+			while (true) {
+				using (Process sente = new Process())
+				using (Process gote = new Process()) {
+					try {
+						Console.Write($"waiting setup {b.name}...");
+						b.Start(sente);
+						Console.WriteLine(" readyok.");
+						Console.Write($"waiting setup {w.name}...");
+						w.Start(gote);
+						Console.WriteLine(" readyok.");
+						var kifu = new List<string>();
+						var evals = new List<int>();
+						int startmove = 1;
+						List<Kyokumen> history = new List<Kyokumen>();
+						string go = $"go btime 0 wtime 0 byoyomi {byoyomi}";
+						var starttime = DateTime.Now;
+						string startsfen = "startpos";
+						if (startusi != "startpos") {
+							string[] tokens = startusi.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+							if (tokens[0] != "startpos") throw new NotImplementedException();
+							else {
+								history.Add(new Kyokumen());
+								for (int i = 2; i < tokens.Length; i++) {
+									kifu.Add(tokens[i]);
+									evals.Add(0);
+									history.Add(new Kyokumen(history[history.Count - 1], tokens[i]));
+								}
+								startmove = history.Count;
+							}
+						}
+						else {
+							history.Add(new Kyokumen());
+						}
+						Console.WriteLine($"start at {startusi}");
+						Console.Write($"{starttime.ToString(Kifu.TimeFormat)} {matchname}:");
+						Result result;
+						while (true) {
+							if (kifu.Count % 2 == 0) {//先手
+								var (move, eval) = GetMove(sente, position(startsfen, kifu), go);
+								Console.Write($" b:{move}({eval})");
+								if (move == "resign") {
+									result = Result.GoteWin;
+									break;
+								}
+								else if (move == "win") {
+									result = Result.SenteWin;
+									break;
+								}
+								var nextKyokumen = new Kyokumen(history[history.Count - 1], move);
+								if (CheckRepetition(nextKyokumen, history)) {
+									result = Result.Repetition;
+									break;
+								}
+								if (CheckEndless(history.Count)) {
+									result = Result.Draw;
+									break;
+								}
+								kifu.Add(move);
+								evals.Add(eval);
+								history.Add(nextKyokumen);
+							}
+							else {//後手
+								var (move, eval) = GetMove(gote, position(startsfen, kifu), go);
+								Console.Write($" w:{move}({-eval})");
+								if (move == "resign") {
+									result = Result.SenteWin;
+									break;
+								}
+								else if (move == "win") {
+									result = Result.GoteWin;
+									break;
+								}
+								var nextKyokumen = new Kyokumen(history[history.Count - 1], move);
+								if (CheckRepetition(nextKyokumen, history)) {
+									result = Result.Repetition;
+									break;
+								}
+								if (CheckEndless(history.Count)) {
+									result = Result.Draw;
+									break;
+								}
+								kifu.Add(move);
+								evals.Add(-eval);
+								history.Add(nextKyokumen);
+							}
+						}
+						Kifu.FoutKifu(starttime, matchname, b, w, byoyomi, kifu, startmove, evals, result, kifupath);
+						sendGameOver(sente, gote, result);
+						_kifu = kifu;
+						_evals = evals;
+						return result;
+					}
+					catch (IOException e) {
+						Console.WriteLine(e);
+						if (!sente.HasExited) sente.StandardInput.WriteLine("quit");
+						if (!gote.HasExited) gote.StandardInput.WriteLine("quit");
+					}
+					finally {
+						if (!sente.WaitForExit(100)) {
+							try {
+								sente.Kill();
+							}
+							catch (Exception) {
+								//プロセスは既に終了しているので何もしない（waitが終わってkillを呼ぶまでの一瞬の間にプロセスが終了した場合に例外が発生する）
+							}
+						}
+						if (!gote.WaitForExit(100)) {
+							try {
+								gote.Kill();
+							}
+							catch (Exception) {
+								//プロセスは既に終了しているので何もしない
+							}
+						}
+					}
+				}
+			}
+		}
+
 		static string position(string startsfen, List<string> kifu) {
 			if (kifu.Count > 0) {
 				StringBuilder sb = new StringBuilder("position ").Append(startsfen);
