@@ -605,7 +605,7 @@ namespace USI_MultipleMatch
 
 			for (int t = team.ruiseki_count + 1; t <= targetnum; t++) {
 				//一定回数ごとにバックアップ
-				if (t % team.backup_span == 0) team.backup_param();
+				if (t % team.backup_span == 0) team.backup_param(t.ToString());
 
 				//手番は基本的には先後交互に, ただしチーム数が偶数だと偏るので奇数周期では反対にする
 				bool teban = ((t % 2) == 0);
@@ -617,7 +617,7 @@ namespace USI_MultipleMatch
 				team.versus(teban, t);
 				Console.WriteLine($"versus {t} end");
 			}
-			team.backup_param();
+			team.backup_param(targetnum.ToString());
 			Console.WriteLine($"learn end.");
 		}
 	}

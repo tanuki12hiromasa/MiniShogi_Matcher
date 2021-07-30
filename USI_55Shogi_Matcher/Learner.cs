@@ -127,11 +127,33 @@ namespace USI_MultipleMatch
 				}
 			}
 
+			while (true) {
+				string str = engine.StandardOutput.ReadLine();
+				Console.WriteLine(str);
+				if (str == "learning end.") break;
+			}
+
+			engine.StandardInput.WriteLine("n");
+			engine.StandardInput.WriteLine("quit");
+			engine.Close();
 		}
 
 		static string setoptionusi(string settingline) {
 			var token = settingline.Split(' ');
 			return $"setoption name {token[0]} value {token[2]}";
+		}
+
+		public void save_eval(string folderpath) {
+			using var proc = new Process();
+			Start(proc);
+			proc.StandardInput.WriteLine($"saveparam {folderpath}");
+			while (true) {
+				string str = proc.StandardOutput.ReadLine();
+				Console.WriteLine(str);
+				if (str == "saveparam done.") break;
+			}
+			proc.StandardInput.WriteLine("quit");
+			proc.Close();
 		}
 	}
 }

@@ -22,6 +22,7 @@ namespace USI_MultipleMatch
 			this.teamname = teamname;
 			backup_span = 100;
 			ruiseki_count = 0;
+			opponents = new List<Player>();
 		}
 
 		string getTeamfolder() {
@@ -133,8 +134,10 @@ namespace USI_MultipleMatch
 			save_settingfile();
 		}
 
-		public void backup_param() {
-
+		public void backup_param(string backupname) {
+			string path = $"{getTeamfolder()}/evalbackup/{backupname}";
+			Directory.CreateDirectory(path);
+			learner.save_eval(path);
 		}
 	}
 }
