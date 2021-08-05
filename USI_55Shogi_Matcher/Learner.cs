@@ -69,29 +69,33 @@ namespace USI_MultipleMatch
 				}
 			}
 		}
-		public void Start(Process process) {
+		public void Start(Process process, bool redirectSO) {
 			if (process == null) throw new IOException("Process is Null.");
 			process.StartInfo.UseShellExecute = false;
-			process.StartInfo.RedirectStandardOutput = true;
+			process.StartInfo.RedirectStandardOutput = redirectSO;
 			process.StartInfo.RedirectStandardInput = true;
-			process.StartInfo.RedirectStandardError = true;
-			process.StartInfo.ErrorDialog = false;
+			process.StartInfo.RedirectStandardError = false;
+			process.StartInfo.ErrorDialog = true;
 			process.StartInfo.FileName = learner_path;
 			process.StartInfo.WorkingDirectory = System.IO.Path.GetDirectoryName(learner_path);
 			process.Start();
 			foreach (string usi in options) process.StandardInput.WriteLine(setoptionusi(usi));
 			process.StandardInput.WriteLine("init");
-			while (true) { if (process.StandardOutput.ReadLine() == "readyok") break; }
+			while (redirectSO) { if (process.StandardOutput.ReadLine() == "readyok") break; }
 
 
 
+		}
+
+		public void Start(Process process) {
+			Start(process, true);
 		}
 
 
 
 		public void Learn(Result result, bool player_teban, string startsfen, List<string> kifu, List<int> evals) {
 			using Process engine = new Process();
-			Start(engine);
+			Start(engine, false);
 			engine.StandardInput.WriteLine("learnbykifu");
 
 			//棋譜入力
@@ -128,15 +132,24 @@ namespace USI_MultipleMatch
 				}
 			}
 			engine.StandardInput.WriteLine((startcount).ToString());
+			Console.WriteLine($"learning start from {startcount} moves.");
 
+			System.Threading.Tasks.Task.Delay(1).Wait();
+			engine.StandardInput.WriteLine("n");
+			engine.StandardInput.WriteLine("quit");
+
+			engine.WaitForExit();
+			/*
 			while (true) {
+				if (engine.HasExited) {
+					Console.WriteLine("ERROR: ENGINE LOST");
+					return;
+				}
 				string str = engine.StandardOutput.ReadLine();
 				if(str != null && str!="") Console.WriteLine(str);
 				if (str == "learning end.") break;
 			}
-
-			engine.StandardInput.WriteLine("n");
-			engine.StandardInput.WriteLine("quit");
+			*/
 			engine.Close();
 		}
 
@@ -148,7 +161,7 @@ namespace USI_MultipleMatch
 		public void save_eval(string folderpath) {
 			using var proc = new Process();
 			Start(proc);
-			proc.StandardInput.WriteLine($"saveparam {folderpath}");
+			proc.StandardInput.WriteLine($"saveparam {Path.GetFullPath(folderpath)}");
 			while (true) {
 				string str = proc.StandardOutput.ReadLine();
 				Console.WriteLine(str);

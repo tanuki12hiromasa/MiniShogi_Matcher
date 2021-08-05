@@ -15,7 +15,7 @@ namespace USI_MultipleMatch
 		public int team_num { get => opponents.Count; }
 
 		Player player;
-		Learner learner;
+		public Learner learner;
 		List<Player> opponents;
 
 		public LearnTeam(string teamname) {

@@ -56,6 +56,9 @@ namespace USI_MultipleMatch
 					case "rls":
 						learn_league();
 						break;
+					case "test":
+						test();
+						break;
 					case "quit":
 					case "q":
 						alive = false;
@@ -619,6 +622,16 @@ namespace USI_MultipleMatch
 			}
 			team.backup_param(targetnum.ToString());
 			Console.WriteLine($"learn end.");
+		}
+
+		static void test() {
+			LearnTeam team = new LearnTeam("test02");
+			team.load();
+			string kifustr = "2e4c 3a3b 4c3d 3b3c 3d2e 2a2b 4e4d 3c4d 3e4d G*2d S*4b 4a3b 4b5a+ 2d1e 2e5b R*2e 5b2e 1e2e 5a5b 1b1c 5b4b 3b2a R*3d 2a1b 3d3a+ 1b2a R*4a B*1b 4d3c 2b3c 3a3c S*2b 3c4d 2e1e G*3b 2b2c 3b2a";
+			List<string> kifu = kifustr.Split(' ').ToList();
+			string evalstr = "0 0 -2 0 -143 -145 -164 -183 -416 -401 -38 -39 -49 -43 -42 -39 -41 -40 -36 2 221 219 214 236 298 331 427 1989 2107 2087 2263 2351 2297 2526 2355 2743 2447";
+			List<int> evals = new List<int>(); foreach(var e in evalstr.Split(' ')) { evals.Add(int.Parse(e)); }
+			team.learner.Learn(Result.SenteWin, false, "startpos", kifu, evals);
 		}
 	}
 }
