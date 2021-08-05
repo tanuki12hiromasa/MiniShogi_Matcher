@@ -582,14 +582,14 @@ namespace USI_MultipleMatch
 		}
 
 		static void learn_register() {
-			Console.Write("team name? >");
+			Console.Write("team name? > ");
 			string team_name = Console.ReadLine();
 			LearnTeam team = new LearnTeam(team_name);
 			team.setting();
 		}
 
 		static void learn_league() {
-			Console.Write("team name? >");
+			Console.Write("team name? > ");
 			string team_name = Console.ReadLine();
 			LearnTeam team = new LearnTeam(team_name);
 			if(!team.load()) {
@@ -600,10 +600,10 @@ namespace USI_MultipleMatch
 			Console.WriteLine($"current ruiseki_count is {team.ruiseki_count}.");
 			int targetnum;
 			do {
-				Console.Write($"How match is target count? >");
-			} while (int.TryParse(Console.ReadLine(), out targetnum) && targetnum > team.ruiseki_count);
+				Console.Write($"How match is target count? > ");
+			} while (int.TryParse(Console.ReadLine(), out targetnum) && targetnum <= team.ruiseki_count);
 
-			for (int t = team.ruiseki_count + 1; t <= targetnum; t++) {
+			for (int t = team.ruiseki_count; t < targetnum; t++) {
 				//一定回数ごとにバックアップ
 				if (t % team.backup_span == 0) team.backup_param(t.ToString());
 

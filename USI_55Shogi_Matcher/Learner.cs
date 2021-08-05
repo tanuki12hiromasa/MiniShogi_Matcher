@@ -119,17 +119,19 @@ namespace USI_MultipleMatch
 				case Result.Draw: engine.StandardInput.WriteLine("d"); break;
 			}
 
-			//学習開始手数 （初手は1とする）
+			//学習開始手数 （初形は0とする）
+			int startcount = 0;
 			for(int n = 0; n < evals.Count; n++) {
 				if(Math.Abs(evals[n]) >= eval_learn_border) {
-					engine.StandardInput.WriteLine((n + 1).ToString());
+					startcount = n;
 					break;
 				}
 			}
+			engine.StandardInput.WriteLine((startcount).ToString());
 
 			while (true) {
 				string str = engine.StandardOutput.ReadLine();
-				Console.WriteLine(str);
+				if(str != null && str!="") Console.WriteLine(str);
 				if (str == "learning end.") break;
 			}
 
