@@ -14,7 +14,7 @@ namespace USI_MultipleMatch
 			alive = true;
 			Console.WriteLine("連続対局プログラム");
 			while (alive) {
-				Console.Write("command?(r/s/tm/ts/ls/c/lr/ll/k/ks/q) > ");
+				Console.Write("command?(r/s/tm/ts/ls/c/lr/ll/k/ks/rlr/rls/q) > ");
 				switch (Console.ReadLine()) {
 					case "register":
 					case "r":
@@ -47,6 +47,17 @@ namespace USI_MultipleMatch
 					case "kifutosfen":
 					case "ks":
 						Kifu.KifutxtToSfen();
+						break;
+					case "reinforcementlearningregister":
+					case "rlr":
+						learn_register();
+						break;
+					case "reinforcementlearningstart":
+					case "rls":
+						learn_league();
+						break;
+					case "test":
+						test();
 						break;
 					case "quit":
 					case "q":
@@ -574,27 +585,55 @@ namespace USI_MultipleMatch
 		}
 
 		static void learn_register() {
-			//
-			Console.Write("match name? >");
-			string match_name = Console.ReadLine(); 
-			Console.Write("team name? >");
+			Console.Write("team name? > ");
 			string team_name = Console.ReadLine();
-			Console.Write("engine path? >");
-			string engine_path = Console.ReadLine();
-			Console.Write("learner path? >");
-			string learner_path = Console.ReadLine();
-			//新規の対戦部屋ならフォルダを作成
-
-			//チームフォルダを作成
-
-			//playerのオプションファイル生成
-
-			//learnerのオプションファイル生成
-
+			LearnTeam team = new LearnTeam(team_name);
+			team.setting();
 		}
 
 		static void learn_league() {
+			Console.Write("team name? > ");
+			string team_name = Console.ReadLine();
+			LearnTeam team = new LearnTeam(team_name);
+			if(!team.load()) {
+				Console.WriteLine("no such teamfile.");
+				return;
+			}
 
+			Console.WriteLine($"current ruiseki_count is {team.ruiseki_count}.");
+			int targetnum;
+			do {
+				Console.Write($"How match is target count? > ");
+			} while (int.TryParse(Console.ReadLine(), out targetnum) && targetnum <= team.ruiseki_count);
+
+			for (int t = team.ruiseki_count; t < targetnum; t++) {
+				//一定回数ごとにバックアップ
+				if (t % team.backup_span == 0) team.backup_param(t.ToString());
+
+				//手番は基本的には先後交互に, ただしチーム数が偶数だと偏るので奇数周期では反対にする
+				bool teban = ((t % 2) == 0);
+				if ((team.team_num % 2) == 0 && ((t/team.team_num) % 2) != 0) {
+					teban = !teban;
+				}
+
+				Console.WriteLine($"versus {t} start");
+				team.versus(teban, t);
+				Console.WriteLine($"versus {t} end");
+			}
+			team.backup_param(targetnum.ToString());
+			Console.WriteLine($"learn end.");
+		}
+
+		static void test() {
+			LearnTeam team = new LearnTeam("test02");
+			team.load();
+			//string kifustr = "2e4c 3a3b 4c3d 3b3c 3d2e 2a2b 4e4d 3c4d 3e4d G*2d S*4b 4a3b 4b5a+ 2d1e 2e5b R*2e 5b2e 1e2e 5a5b 1b1c 5b4b 3b2a R*3d 2a1b 3d3a+ 1b2a R*4a B*1b 4d3c 2b3c 3a3c S*2b 3c4d 2e1e G*3b 2b2c 3b2a";
+			string kifustr = "2e4c 3a3b 4c2e 3b3c 1e1d 4a1d 2e1d R*1e 1d2c 1e1c+ B*3b 2a3a 3e3d 1c2d 3d3c 2d3c S*3d 3c3b 2c3b 3a3b 4e3e S*1d R*5c B*2b 3d3c 2b3c 5c3c 3b3c B*4b R*3a 4b5a+ 3a5a 3e4d B*2d R*4b S*3a";
+			List<string> kifu = kifustr.Split(' ').ToList();
+			//string evalstr = "0 0 -2 0 -143 -145 -164 -183 -416 -401 -38 -39 -49 -43 -42 -39 -41 -40 -36 2 221 219 214 236 298 331 427 1989 2107 2087 2263 2351 2297 2526 2355 2743 2447";
+			string evalstr = "0 0 -10 -135 -152 -628 -619 -633 -629 -638 -802 -784 -878 -831 -878 -922 -1265 -1264 -1294 -1278 -1300 -1274 -1351 -2056 -2066 -2053 -2061 -2051 -2056 -2061 -2068 -2086 -2042 -2085 -3290 -31700";
+			List<int> evals = new List<int>(); foreach(var e in evalstr.Split(' ')) { evals.Add(int.Parse(e)); }
+			team.learner.Learn(Result.SenteWin, false, "startpos", kifu, evals);
 		}
 	}
 }
