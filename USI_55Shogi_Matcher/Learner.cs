@@ -101,7 +101,8 @@ namespace USI_MultipleMatch
 			//棋譜入力
 			engine.StandardInput.Write("position ");
 			engine.StandardInput.Write(startsfen);
-			foreach(var move in kifu) {
+			engine.StandardInput.Write(" moves");
+			foreach (var move in kifu) {
 				engine.StandardInput.Write(" ");
 				engine.StandardInput.Write(move);
 			}

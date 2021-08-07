@@ -627,9 +627,11 @@ namespace USI_MultipleMatch
 		static void test() {
 			LearnTeam team = new LearnTeam("test02");
 			team.load();
-			string kifustr = "2e4c 3a3b 4c3d 3b3c 3d2e 2a2b 4e4d 3c4d 3e4d G*2d S*4b 4a3b 4b5a+ 2d1e 2e5b R*2e 5b2e 1e2e 5a5b 1b1c 5b4b 3b2a R*3d 2a1b 3d3a+ 1b2a R*4a B*1b 4d3c 2b3c 3a3c S*2b 3c4d 2e1e G*3b 2b2c 3b2a";
+			//string kifustr = "2e4c 3a3b 4c3d 3b3c 3d2e 2a2b 4e4d 3c4d 3e4d G*2d S*4b 4a3b 4b5a+ 2d1e 2e5b R*2e 5b2e 1e2e 5a5b 1b1c 5b4b 3b2a R*3d 2a1b 3d3a+ 1b2a R*4a B*1b 4d3c 2b3c 3a3c S*2b 3c4d 2e1e G*3b 2b2c 3b2a";
+			string kifustr = "2e4c 3a3b 4c2e 3b3c 1e1d 4a1d 2e1d R*1e 1d2c 1e1c+ B*3b 2a3a 3e3d 1c2d 3d3c 2d3c S*3d 3c3b 2c3b 3a3b 4e3e S*1d R*5c B*2b 3d3c 2b3c 5c3c 3b3c B*4b R*3a 4b5a+ 3a5a 3e4d B*2d R*4b S*3a";
 			List<string> kifu = kifustr.Split(' ').ToList();
-			string evalstr = "0 0 -2 0 -143 -145 -164 -183 -416 -401 -38 -39 -49 -43 -42 -39 -41 -40 -36 2 221 219 214 236 298 331 427 1989 2107 2087 2263 2351 2297 2526 2355 2743 2447";
+			//string evalstr = "0 0 -2 0 -143 -145 -164 -183 -416 -401 -38 -39 -49 -43 -42 -39 -41 -40 -36 2 221 219 214 236 298 331 427 1989 2107 2087 2263 2351 2297 2526 2355 2743 2447";
+			string evalstr = "0 0 -10 -135 -152 -628 -619 -633 -629 -638 -802 -784 -878 -831 -878 -922 -1265 -1264 -1294 -1278 -1300 -1274 -1351 -2056 -2066 -2053 -2061 -2051 -2056 -2061 -2068 -2086 -2042 -2085 -3290 -31700";
 			List<int> evals = new List<int>(); foreach(var e in evalstr.Split(' ')) { evals.Add(int.Parse(e)); }
 			team.learner.Learn(Result.SenteWin, false, "startpos", kifu, evals);
 		}
