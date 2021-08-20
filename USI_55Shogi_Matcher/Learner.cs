@@ -17,6 +17,7 @@ namespace USI_MultipleMatch
 			//1行目:name 2行目:path 3行目~:option
 			using (StreamReader reader = new StreamReader(settingpath)) {
 				name = reader.ReadLine();
+				enginename = reader.ReadLine();
 				learner_path = reader.ReadLine();
 				options = new List<string>();
 				while (!reader.EndOfStream) {
@@ -63,6 +64,7 @@ namespace USI_MultipleMatch
 		public void settingsave(string settingpath) {//player.txtにPlayerの情報を書き込む
 			using (StreamWriter writer = new StreamWriter(settingpath, false)) {
 				writer.WriteLine(name);
+				writer.WriteLine(enginename);
 				writer.WriteLine(learner_path);
 				foreach (string option in options) {
 					writer.WriteLine(option);

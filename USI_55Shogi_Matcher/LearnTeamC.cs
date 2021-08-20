@@ -5,7 +5,7 @@ using System.IO;
 
 namespace USI_MultipleMatch
 {
-	class LearnTeam
+	class LearnTeamC
 	{
 		public string teamname;
 
@@ -14,11 +14,10 @@ namespace USI_MultipleMatch
 		public int ruiseki_count;
 		public int team_num { get => opponents.Count; }
 
-		Player player;
-		public Learner learner;
+		Player l_player;
 		List<Player> opponents;
 
-		public LearnTeam(string teamname) {
+		public LearnTeamC(string teamname) {
 			this.teamname = teamname;
 			backup_span = 100;
 			ruiseki_count = 0;
@@ -26,11 +25,11 @@ namespace USI_MultipleMatch
 		}
 
 		string getTeamfolder() {
-			return $"./learnteam/{teamname}";
+			return $"./learnteamC/{teamname}";
 		}
 
 		public bool load() {
-			string teamfolder = "./learnteam/" + teamname;
+			string teamfolder = getTeamfolder();
 			if (System.IO.File.Exists(teamfolder + "/setting.txt")) {
 				int teamnum;
 				using (StreamReader reader = new StreamReader(teamfolder + "/setting.txt")) {
@@ -41,8 +40,7 @@ namespace USI_MultipleMatch
 					ruiseki_count = int.Parse(reader.ReadLine());
 				}
 
-				learner = new Learner($"{teamfolder}/Learner.txt");
-				player = new Player($"{teamfolder}/L-Player.txt");
+				l_player = new Player($"{teamfolder}/L-Player.txt");
 				for(int i = 1; i <= teamnum; i++) {
 					opponents.Add(new Player($"{teamfolder}/Player{i}.txt"));
 				}
@@ -55,7 +53,7 @@ namespace USI_MultipleMatch
 		}
 
 		public void save_settingfile() {
-			string teamfolder = "./learnteam/" + teamname;
+			string teamfolder = getTeamfolder();
 			using (StreamWriter writer = new StreamWriter($"{teamfolder}/setting.txt")) {
 				writer.WriteLine(opponents.Count);
 				writer.WriteLine(batchnum);
@@ -66,7 +64,7 @@ namespace USI_MultipleMatch
 
 
 		public void setting() {
-			string teamfolder = "./learnteam/" + teamname;
+			string teamfolder = getTeamfolder();
 			if (!Directory.Exists(teamfolder)) Directory.CreateDirectory(teamfolder);
 			if (System.IO.File.Exists(teamfolder + "/setting.txt")) {
 				load();
@@ -89,15 +87,10 @@ namespace USI_MultipleMatch
 
 			}
 			else {
-				Console.Write("Learn-Player Learner path? > ");
-				string learnerpath = Console.ReadLine();
-				learner = new Learner(learnerpath, "Leaner");
-				learner.settingsave($"{teamfolder}/Learner.txt");
-
-				Console.Write("Learn-Player Player path? > ");
+				Console.Write("Learn-Player path? > ");
 				string lPlayerpath = Console.ReadLine();
-				player = new Player(lPlayerpath, "L-Player");
-				player.settingsave($"{teamfolder}/L-Player.txt");
+				l_player = new Player(lPlayerpath, "L-Player");
+				l_player.settingsave($"{teamfolder}/L-Player.txt");
 
 				int opponentnum = 0;
 				do {
@@ -121,16 +114,13 @@ namespace USI_MultipleMatch
 
 		public void versus(bool teban, int teamnum) {
 			teamnum %= opponents.Count;
-			Player b = teban ? player : opponents[teamnum];
-			Player w = teban ? opponents[teamnum] : player;
+			Player b = teban ? l_player : opponents[teamnum];
+			Player w = teban ? opponents[teamnum] : l_player;
 
 			//対局
 			string teamfolder = getTeamfolder();
 			string start = "startpos";
-			var result = Match.match($"{teamname}-{ruiseki_count}", 800, b, w, out List<string> kifu, out List<int> evals, start, $"{teamfolder}/kifu.txt");
-
-			//学習
-			learner.Learn(result, teban, start, kifu, evals);
+			Match.match_and_learn($"{teamname}-{ruiseki_count}", 1000, b, w, teban, !teban, start, $"{teamfolder}/kifu.txt");
 
 			ruiseki_count++;
 			save_settingfile();
@@ -139,7 +129,7 @@ namespace USI_MultipleMatch
 		public void backup_param(string backupname) {
 			string path = $"{getTeamfolder()}/evalbackup/{backupname}";
 			Directory.CreateDirectory(path);
-			learner.save_eval(path);
+			l_player.save_eval(path);
 		}
 	}
 }
