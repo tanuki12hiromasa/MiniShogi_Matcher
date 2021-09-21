@@ -120,7 +120,7 @@ namespace USI_MultipleMatch
 			//対局
 			string teamfolder = getTeamfolder();
 			string start = "startpos";
-			Match.match_and_learn($"{teamname}-{ruiseki_count}", 1000, b, w, teban, !teban, start, $"{teamfolder}/kifu.txt");
+			Match.match($"{teamname}-{ruiseki_count}", 1000, b, w, start, $"{teamfolder}/kifu.txt", -1);
 
 			ruiseki_count++;
 			save_settingfile();

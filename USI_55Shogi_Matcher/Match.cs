@@ -12,7 +12,7 @@ namespace USI_MultipleMatch
 	}
 	class Match 
 	{
-		public static Result match(string matchname, uint byoyomi, Player b, Player w, string startusi = "startpos", string kifupath = @"./kifu.txt") {//開始局面のusiはsfen部分から
+		public static Result match(string matchname, uint byoyomi, Player b, Player w, string startusi = "startpos", string kifupath = @"./kifu.txt", int waittime = 100) {//開始局面のusiはsfen部分から
 			while (true) {
 				using (Process sente = new Process())
 				using (Process gote = new Process()) {
@@ -120,7 +120,7 @@ namespace USI_MultipleMatch
 						if(!gote.HasExited) gote.StandardInput.WriteLine("quit");
 					}
 					finally {
-						if (!sente.WaitForExit(100)) {
+						if (!sente.WaitForExit(waittime)) {
 							try {
 								sente.Kill();
 							}
@@ -129,7 +129,7 @@ namespace USI_MultipleMatch
 								//プロセスは既に終了しているので何もしない（waitが終わってkillを呼ぶまでの一瞬の間にプロセスが終了した場合に例外が発生する）
 							}
 						}
-						if (!gote.WaitForExit(100)) {
+						if (!gote.WaitForExit(waittime)) {
 							try {
 								gote.Kill();
 							}
