@@ -100,5 +100,60 @@ namespace USI_MultipleMatch
 			var token = settingline.Split(' ');
 			return $"setoption name {token[0]} value {token[2]}";
 		}
+
+		public void Learn(Process engine, bool player_teban, Result result, List<int> evals, int eval_learn_border = 200) {
+			engine.StandardInput.WriteLine("learn");
+			
+			//手番(s/g)
+			if (player_teban) {
+				engine.StandardInput.WriteLine("s");
+			}
+			else {
+				engine.StandardInput.WriteLine("g");
+			}
+
+			//勝敗(s/g/d)
+			switch (result) {
+				case Result.SenteWin: engine.StandardInput.WriteLine("s"); break;
+				case Result.Repetition:
+				case Result.GoteWin: engine.StandardInput.WriteLine("g"); break;
+				case Result.Draw: engine.StandardInput.WriteLine("d"); break;
+			}
+
+			//学習開始手数 （初形は0とする）
+			int startcount = 0;
+			for (int n = 0; n < evals.Count; n++) {
+				if (Math.Abs(evals[n]) >= eval_learn_border) {
+					startcount = n;
+					break;
+				}
+			}
+			engine.StandardInput.WriteLine((startcount).ToString());
+			Console.WriteLine($"learning start from {startcount} moves.");
+
+			while (true) {
+				if (engine.HasExited) {
+					Console.WriteLine("ERROR: ENGINE LOST");
+					return;
+				}
+				string str = engine.StandardOutput.ReadLine();
+				if (str != null && str != "") Console.WriteLine(str);
+				if (str == "learning end.") break;
+			}
+
+		}
+
+		public void save_eval(string folderpath) {
+			using var proc = new Process();
+			Start(proc);
+			proc.StandardInput.WriteLine($"saveparam {Path.GetFullPath(folderpath)}");
+			while (true) {
+				string str = proc.StandardOutput.ReadLine();
+				Console.WriteLine(str);
+				if (str == "saveparam done.") break;
+			}
+			proc.StandardInput.WriteLine("quit");
+			proc.Close();
+		}
 	}
 }

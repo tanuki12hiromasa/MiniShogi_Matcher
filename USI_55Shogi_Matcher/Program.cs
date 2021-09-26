@@ -14,7 +14,7 @@ namespace USI_MultipleMatch
 			alive = true;
 			Console.WriteLine("連続対局プログラム");
 			while (alive) {
-				Console.Write("command?(r/s/tm/ts/ls/c/lr/ll/k/ks/rlr/rls/q) > ");
+				Console.Write("command?(r/s/tm/ts/ls/c/lr/ll/k/ks/rlr/rls/rlcr/rlcs/q) > ");
 				switch (Console.ReadLine()) {
 					case "register":
 					case "r":
@@ -55,6 +55,14 @@ namespace USI_MultipleMatch
 					case "reinforcementlearningstart":
 					case "rls":
 						learn_league();
+						break;
+					case "reinforcementlearncommanderregister":
+					case "rlcr":
+						learn_commander_register();
+						break;
+					case "reinforcementlearncommanderstart":
+					case "rlcs":
+						learn_commander_league();
 						break;
 					case "test":
 						test();
@@ -613,6 +621,45 @@ namespace USI_MultipleMatch
 				//手番は基本的には先後交互に, ただしチーム数が偶数だと偏るので奇数周期では反対にする
 				bool teban = ((t % 2) == 0);
 				if ((team.team_num % 2) == 0 && ((t/team.team_num) % 2) != 0) {
+					teban = !teban;
+				}
+
+				Console.WriteLine($"versus {t} start");
+				team.versus(teban, t);
+				Console.WriteLine($"versus {t} end");
+			}
+			team.backup_param(targetnum.ToString());
+			Console.WriteLine($"learn end.");
+		}
+
+		static void learn_commander_register() {
+			Console.Write("team name? > ");
+			string team_name = Console.ReadLine();
+			LearnTeamC team = new LearnTeamC(team_name);
+			team.setting();
+		}
+		static void learn_commander_league() {
+			Console.Write("team name? > ");
+			string team_name = Console.ReadLine();
+			LearnTeamC team = new LearnTeamC(team_name);
+			if (!team.load()) {
+				Console.WriteLine("no such teamfile.");
+				return;
+			}
+
+			Console.WriteLine($"current ruiseki_count is {team.ruiseki_count}.");
+			int targetnum;
+			do {
+				Console.Write($"How match is target count? > ");
+			} while (int.TryParse(Console.ReadLine(), out targetnum) && targetnum <= team.ruiseki_count);
+
+			for (int t = team.ruiseki_count; t < targetnum; t++) {
+				//一定回数ごとにバックアップ
+				if (t % team.backup_span == 0) team.backup_param(t.ToString());
+
+				//手番は基本的には先後交互に, ただしチーム数が偶数だと偏るので奇数周期では反対にする
+				bool teban = ((t % 2) == 0);
+				if ((team.team_num % 2) == 0 && ((t / team.team_num) % 2) != 0) {
 					teban = !teban;
 				}
 
