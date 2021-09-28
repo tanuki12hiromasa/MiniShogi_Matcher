@@ -120,6 +120,8 @@ namespace USI_MultipleMatch
 						if(!gote.HasExited) gote.StandardInput.WriteLine("quit");
 					}
 					finally {
+						if (!sente.HasExited) sente.StandardInput.WriteLine("quit");
+						if (!gote.HasExited) gote.StandardInput.WriteLine("quit");
 						if (!sente.WaitForExit(waittime)) {
 							try {
 								sente.Kill();
