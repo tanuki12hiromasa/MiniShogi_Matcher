@@ -19,7 +19,7 @@ namespace USI_MultipleMatch
 
 		public LearnTeamC(string teamname) {
 			this.teamname = teamname;
-			backup_span = 100;
+			backup_span = 50;
 			ruiseki_count = 0;
 			opponents = new List<Player>();
 		}
@@ -106,7 +106,7 @@ namespace USI_MultipleMatch
 					if (ans != "y") break;
 				} while (true);
 
-
+				backup_span = opponentnum * 10;
 
 				save_settingfile();
 			}
@@ -120,7 +120,7 @@ namespace USI_MultipleMatch
 			//対局
 			string teamfolder = getTeamfolder();
 			string start = "startpos";
-			Match.match($"{teamname}-{ruiseki_count}", 1000, b, w, start, $"{teamfolder}/kifu.txt", -1);
+			Match.match($"{teamname}-{ruiseki_count}", 600, b, w, start, $"{teamfolder}/kifu.txt", -1);
 
 			ruiseki_count++;
 			save_settingfile();
