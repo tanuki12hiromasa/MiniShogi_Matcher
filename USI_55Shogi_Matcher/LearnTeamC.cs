@@ -12,6 +12,7 @@ namespace USI_MultipleMatch
 		public int batchnum;
 		public int backup_span;
 		public int ruiseki_count;
+		public uint thinking_time;
 		public int team_num { get => opponents.Count; }
 
 		Player l_player;
@@ -19,8 +20,9 @@ namespace USI_MultipleMatch
 
 		public LearnTeamC(string teamname) {
 			this.teamname = teamname;
-			backup_span = 100;
+			backup_span = 50;
 			ruiseki_count = 0;
+			thinking_time = 600;
 			opponents = new List<Player>();
 		}
 
@@ -38,6 +40,7 @@ namespace USI_MultipleMatch
 					batchnum = int.Parse(reader.ReadLine());
 					backup_span = int.Parse(reader.ReadLine());
 					ruiseki_count = int.Parse(reader.ReadLine());
+					if (!reader.EndOfStream) thinking_time = uint.Parse(reader.ReadLine());
 				}
 
 				l_player = new Player($"{teamfolder}/L-Player.txt");
@@ -59,6 +62,7 @@ namespace USI_MultipleMatch
 				writer.WriteLine(batchnum);
 				writer.WriteLine(backup_span);
 				writer.WriteLine(ruiseki_count);
+				writer.WriteLine(thinking_time);
 			}
 		}
 
@@ -106,7 +110,7 @@ namespace USI_MultipleMatch
 					if (ans != "y") break;
 				} while (true);
 
-
+				backup_span = opponentnum * 10;
 
 				save_settingfile();
 			}
@@ -120,7 +124,7 @@ namespace USI_MultipleMatch
 			//対局
 			string teamfolder = getTeamfolder();
 			string start = "startpos";
-			Match.match($"{teamname}-{ruiseki_count}", 1000, b, w, start, $"{teamfolder}/kifu.txt", -1);
+			Match.match($"{teamname}-{ruiseki_count}", thinking_time, b, w, start, $"{teamfolder}/kifu.txt", 15000);
 
 			ruiseki_count++;
 			save_settingfile();
