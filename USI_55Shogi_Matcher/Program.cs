@@ -14,7 +14,7 @@ namespace USI_MultipleMatch
 			alive = true;
 			Console.WriteLine("連続対局プログラム");
 			while (alive) {
-				Console.Write("command?(r/s/tm/ts/ls/c/lr/ll/k/ks/rlr/rls/rlcr/rlcs/q) > ");
+				Console.Write("command?(r/s/rr/rs/tm/ts/ls/c/lr/ll/k/ks/rlr/rls/rlcr/rlcs/q) > ");
 				switch (Console.ReadLine()) {
 					case "register":
 					case "r":
@@ -23,6 +23,14 @@ namespace USI_MultipleMatch
 					case "start":
 					case "s":
 						start();
+						break;
+					case "rr":
+					case "renzokuregister":
+						renzoku_register();
+						break;
+					case "rs":
+					case "renzokustart":
+						renzoku_start();
 						break;
 					case "tournamentmakematch":
 					case "tm":
@@ -218,6 +226,102 @@ namespace USI_MultipleMatch
 			}
 			alive = false;
 		}
+
+		static void renzoku_register() {
+			Console.WriteLine("register versus set");
+			while (true) {
+				Console.Write("Versus name? > ");
+				string vsname = Console.ReadLine();
+				string folder = "./versus/" + vsname;
+				if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
+				{//A
+					string playername = "PlayerA";
+					string settingpath = folder + "/PlayerA.txt";
+					Console.Write("input resisterd usi engine's path > ");
+					string path = Console.ReadLine();
+					Player player = new Player(path, playername);
+					player.settingsave(settingpath);
+				}
+				{//B
+					string playername = "PlayerB";
+					string settingpath = folder + "/PlayerB.txt";
+					Console.Write("input resisterd usi engine's path > ");
+					string path = Console.ReadLine();
+					Player player = new Player(path, playername);
+					player.settingsave(settingpath);
+				}
+				{//match setting
+					Console.Write("1手の考慮時間?(ミリ秒) > ");
+					uint byo = uint.Parse(Console.ReadLine());
+					Console.Write("対戦回数? > ");
+					uint rounds = uint.Parse(Console.ReadLine());
+					string settingpath = folder + "/setting.txt";
+					using var fs = new StreamWriter(settingpath);
+					fs.WriteLine(byo);
+					fs.WriteLine(rounds);
+				}
+				Console.WriteLine("add more versus set? (y/n) > ");
+				string ans = Console.ReadLine();
+				if (ans != "y") break;
+			}
+		}
+		static void renzoku_start() {
+			Console.WriteLine("renzoku versus");
+			List<string> vslist = new List<string>();
+			while (true) {
+				Console.Write("Versus name? > ");
+				string vsname = Console.ReadLine();
+				string folder = "./versus/" + vsname;
+				if (!Directory.Exists(folder)) {
+					Console.WriteLine("error: no such folder");
+					continue;
+				}
+				vslist.Add(vsname);
+				Console.WriteLine("add more versus set? (y/n) > ");
+				string ans = Console.ReadLine();
+				if (ans != "y") break;
+			}
+			foreach(var vsname in vslist) {
+				string folder = "./versus/" + vsname;
+				uint byoyomi, rounds;
+				using(var fs = new StreamReader(folder + "/setting.txt")) {
+					byoyomi = uint.Parse(fs.ReadLine());
+					rounds = uint.Parse(fs.ReadLine());
+				}
+				Player playera = new Player(folder + @"/PlayerA.txt");
+				Player playerb = new Player(folder + @"/PlayerB.txt");
+				uint[] results = new uint[4] { 0, 0, 0, 0 };
+				string starttime = DateTime.Now.ToString(Kifu.TimeFormat);
+				for (uint r = 1; r <= rounds; r++) {
+					if (r % 2 != 0) {
+						//a先手
+						var result = Match.match($"{vsname}-{r}", byoyomi, playera, playerb, "startpos", $"{folder}/kifu.txt");
+						switch (result) {
+							case Result.SenteWin: results[0]++; Console.WriteLine($" {playera.name} win"); break;
+							case Result.GoteWin: results[1]++; Console.WriteLine($" {playerb.name} win"); break;
+							case Result.Repetition: results[2]++; Console.WriteLine(" Repetition Draw"); break;
+							case Result.Draw: results[3]++; Console.WriteLine(" Draw"); break;
+						}
+					}
+					else {
+						//b先手
+						var result = Match.match($"{vsname}-{r}", byoyomi, playerb, playera, "startpos", $".{folder}/kifu.txt");
+						switch (result) {
+							case Result.SenteWin: results[1]++; Console.WriteLine($" {playerb.name} win"); break;
+							case Result.GoteWin: results[0]++; Console.WriteLine($" {playera.name} win"); break;
+							case Result.Repetition: results[2]++; Console.WriteLine(" Repetition Draw"); break;
+							case Result.Draw: results[3]++; Console.WriteLine(" Draw"); break;
+						}
+					}
+				}
+				string matchResult = $"{starttime} {vsname} {byoyomi}ms: {results[0]}-{results[1]}-{results[2]}-{results[3]} ({playera.enginename} vs {playerb.enginename})";
+				using (var resultwriter = new StreamWriter(folder + @$"/result.txt", true)) {
+					resultwriter.WriteLine(matchResult);
+				}
+				Console.WriteLine(matchResult);
+			}
+		}
+
 		static void setuptournament() {
 			Console.WriteLine("setup new tournament.");
 			Console.Write("tournament name? > ");
