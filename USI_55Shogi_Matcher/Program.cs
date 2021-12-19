@@ -259,6 +259,7 @@ namespace USI_MultipleMatch
 					using var fs = new StreamWriter(settingpath);
 					fs.WriteLine(byo);
 					fs.WriteLine(rounds);
+					for (int i = 0; i < 4; i++) fs.WriteLine("0");
 				}
 				Console.WriteLine("add more versus set? (y/n) > ");
 				string ans = Console.ReadLine();
@@ -284,15 +285,19 @@ namespace USI_MultipleMatch
 			foreach(var vsname in vslist) {
 				string folder = "./versus/" + vsname;
 				uint byoyomi, rounds;
+				uint[] results = new uint[4] { 0, 0, 0, 0 };
 				using(var fs = new StreamReader(folder + "/setting.txt")) {
 					byoyomi = uint.Parse(fs.ReadLine());
 					rounds = uint.Parse(fs.ReadLine());
+					results[0] = uint.Parse(fs.ReadLine());
+					results[1] = uint.Parse(fs.ReadLine());
+					results[2] = uint.Parse(fs.ReadLine());
+					results[3] = uint.Parse(fs.ReadLine());
 				}
 				Player playera = new Player(folder + @"/PlayerA.txt");
 				Player playerb = new Player(folder + @"/PlayerB.txt");
-				uint[] results = new uint[4] { 0, 0, 0, 0 };
 				string starttime = DateTime.Now.ToString(Kifu.TimeFormat);
-				for (uint r = 1; r <= rounds; r++) {
+				for (uint r = 1 + results[0] + results[1] + results[2] + results[3]; r <= rounds; r++) {
 					if (r % 2 != 0) {
 						//a先手
 						var result = Match.match($"{vsname}-{r}", byoyomi, playera, playerb, "startpos", $"{folder}/kifu.txt");
@@ -305,7 +310,7 @@ namespace USI_MultipleMatch
 					}
 					else {
 						//b先手
-						var result = Match.match($"{vsname}-{r}", byoyomi, playerb, playera, "startpos", $".{folder}/kifu.txt");
+						var result = Match.match($"{vsname}-{r}", byoyomi, playerb, playera, "startpos", $"{folder}/kifu.txt");
 						switch (result) {
 							case Result.SenteWin: results[1]++; Console.WriteLine($" {playerb.name} win"); break;
 							case Result.GoteWin: results[0]++; Console.WriteLine($" {playera.name} win"); break;
@@ -313,6 +318,10 @@ namespace USI_MultipleMatch
 							case Result.Draw: results[3]++; Console.WriteLine(" Draw"); break;
 						}
 					}
+					using var fs = new StreamWriter(folder + "/setting.txt");
+					fs.WriteLine(byoyomi);
+					fs.WriteLine(rounds);
+					for (int i = 0; i < 4; i++) fs.WriteLine(results[i]);
 				}
 				string matchResult = $"{starttime} {vsname} {byoyomi}ms: {results[0]}-{results[1]}-{results[2]}-{results[3]} ({playera.enginename} vs {playerb.enginename})";
 				using (var resultwriter = new StreamWriter(folder + @$"/result.txt", true)) {
