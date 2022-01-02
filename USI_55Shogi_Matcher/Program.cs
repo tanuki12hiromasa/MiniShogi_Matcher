@@ -261,7 +261,7 @@ namespace USI_MultipleMatch
 					fs.WriteLine(rounds);
 					for (int i = 0; i < 4; i++) fs.WriteLine("0");
 				}
-				Console.WriteLine("add more versus set? (y/n) > ");
+				Console.Write("add more versus set? (y/n) > ");
 				string ans = Console.ReadLine();
 				if (ans != "y") break;
 			}
@@ -278,7 +278,7 @@ namespace USI_MultipleMatch
 					continue;
 				}
 				vslist.Add(vsname);
-				Console.WriteLine("add more versus set? (y/n) > ");
+				Console.Write("add more versus set? (y/n) > ");
 				string ans = Console.ReadLine();
 				if (ans != "y") break;
 			}
